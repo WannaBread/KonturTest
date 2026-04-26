@@ -1,2 +1,21 @@
-/.idea
-/OVERVIEW.md
+# Build output
+bin/
+obj/
+
+# User-specific Rider/VS files
+.idea/
+.vs/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
