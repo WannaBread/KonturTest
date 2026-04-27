@@ -1,6 +1,6 @@
 namespace KonturTest.Models;
 
-public sealed class AppSettings
+public sealed record AppSettings
 {
     public string Task1InputPath  { get; set; } = string.Empty;
     public string Task1OutputPath { get; set; } = string.Empty;

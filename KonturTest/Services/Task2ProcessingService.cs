@@ -1,4 +1,5 @@
 using System.IO;
+using KonturTest.Models;
 
 namespace KonturTest.Services;
 
@@ -20,23 +21,15 @@ public sealed class Task2ProcessingService
         {
             ct.ThrowIfCancellationRequested();
 
-            uint raw = reader.ReadUInt32();
+            var r = BitFieldRecord.Read(reader);
 
-            bool isEnabled1 = (raw & 0x1u) != 0;
-            uint value11    = (raw >> 1)  & 0x7u;     // bits 1–3   (3 bits)
-            uint value12    = (raw >> 4)  & 0x7u;     // bits 4–6   (3 bits)
-            uint value13    = (raw >> 7)  & 0x1FFu;   // bits 7–15  (9 bits)
-            bool isEnabled2 = ((raw >> 16) & 0x1u) != 0;
-            uint value21    = (raw >> 17) & 0x7FFu;   // bits 17–27 (11 bits)
-            uint value22    = (raw >> 28) & 0xFu;     // bits 28–31 (4 bits)
-
-            writer.Write(isEnabled1 ? "1" : "0"); writer.Write(',');
-            writer.Write(value11);               writer.Write(',');
-            writer.Write(value12);               writer.Write(',');
-            writer.Write(value13);               writer.Write(',');
-            writer.Write(isEnabled2 ? "1" : "0"); writer.Write(',');
-            writer.Write(value21);               writer.Write(',');
-            writer.WriteLine(value22);
+            writer.Write(r.IsEnabled1 ? "1" : "0"); writer.Write(',');
+            writer.Write(r.Value11);                 writer.Write(',');
+            writer.Write(r.Value12);                 writer.Write(',');
+            writer.Write(r.Value13);                 writer.Write(',');
+            writer.Write(r.IsEnabled2 ? "1" : "0"); writer.Write(',');
+            writer.Write(r.Value21);                 writer.Write(',');
+            writer.WriteLine(r.Value22);
 
             index++;
             if (index % 1000 == 0 || index == totalRecords)

@@ -1,12 +1,26 @@
+using System.IO;
+
 namespace KonturTest.Models;
 
-public sealed class BitFieldRecord
+public sealed record BitFieldRecord(
+    bool IsEnabled1,   // bit 0
+    uint Value11,      // bits 1–3
+    uint Value12,      // bits 4–6
+    uint Value13,      // bits 7–15
+    bool IsEnabled2,   // bit 16
+    uint Value21,      // bits 17–27
+    uint Value22)      // bits 28–31
 {
-    public bool IsEnabled1 { get; init; }  // bit 0
-    public uint Value11    { get; init; }  // bits 1–3   (3 bits)
-    public uint Value12    { get; init; }  // bits 4–6   (3 bits)
-    public uint Value13    { get; init; }  // bits 7–15  (9 bits)
-    public bool IsEnabled2 { get; init; }  // bit 16
-    public uint Value21    { get; init; }  // bits 17–27 (11 bits)
-    public uint Value22    { get; init; }  // bits 28–31 (4 bits)
+    public static BitFieldRecord Read(BinaryReader reader)
+    {
+        uint raw = reader.ReadUInt32();
+        return new BitFieldRecord(
+            IsEnabled1: (raw & 0x1u) != 0,
+            Value11:    (raw >> 1)  & 0x7u,
+            Value12:    (raw >> 4)  & 0x7u,
+            Value13:    (raw >> 7)  & 0x1FFu,
+            IsEnabled2: ((raw >> 16) & 0x1u) != 0,
+            Value21:    (raw >> 17) & 0x7FFu,
+            Value22:    (raw >> 28) & 0xFu);
+    }
 }

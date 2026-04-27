@@ -1,15 +1,11 @@
 using System.Globalization;
 using System.IO;
+using KonturTest.Models;
 
 namespace KonturTest.Services;
 
 public sealed class Task1ProcessingService
 {
-    private const int PacketSize   = 1456;
-    private const int HeaderSize   = 16;
-    private const int BlockCount   = 60;
-    private const int ChannelCount = 6;
-
     public void Process(string inputPath, string outputPath,
         IProgress<double> progress, CancellationToken ct)
     {
@@ -19,33 +15,22 @@ public sealed class Task1ProcessingService
 
         writer.WriteLine("Packet,Channel 1,Channel 2,Channel 3,Channel 4,Channel 5,Channel 6");
 
-        long totalPackets = fs.Length / PacketSize;
+        long totalPackets = fs.Length / PacketRecord.PacketSize;
         long packetIndex  = 0;
 
-        while (fs.Position + PacketSize <= fs.Length)
+        while (fs.Position + PacketRecord.PacketSize <= fs.Length)
         {
             ct.ThrowIfCancellationRequested();
 
-            // header
-            uint size     = reader.ReadUInt32();
-            uint type     = reader.ReadUInt32();
-            uint packetNo = reader.ReadUInt32();
-            uint timeMs   = reader.ReadUInt32();
+            var p = PacketRecord.Read(reader);
 
-            // 60 blocks × 6 channels
-            long[] sums = new long[ChannelCount];
-            for (int b = 0; b < BlockCount; b++)
-                for (int ch = 0; ch < ChannelCount; ch++)
-                    sums[ch] += reader.ReadInt32();
-
-            // write CSV row with averages
-            writer.Write(packetNo);
-            for (int ch = 0; ch < ChannelCount; ch++)
-            {
-                double avg = sums[ch] / (double)BlockCount;
-                writer.Write(',');
-                writer.Write(avg.ToString("G", CultureInfo.InvariantCulture));
-            }
+            writer.Write(p.PacketNo);
+            writer.Write(','); writer.Write(p.Channel1.ToString("G", CultureInfo.InvariantCulture));
+            writer.Write(','); writer.Write(p.Channel2.ToString("G", CultureInfo.InvariantCulture));
+            writer.Write(','); writer.Write(p.Channel3.ToString("G", CultureInfo.InvariantCulture));
+            writer.Write(','); writer.Write(p.Channel4.ToString("G", CultureInfo.InvariantCulture));
+            writer.Write(','); writer.Write(p.Channel5.ToString("G", CultureInfo.InvariantCulture));
+            writer.Write(','); writer.Write(p.Channel6.ToString("G", CultureInfo.InvariantCulture));
             writer.WriteLine();
 
             packetIndex++;
